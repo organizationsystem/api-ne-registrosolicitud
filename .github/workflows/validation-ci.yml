@@ -1,4 +1,4 @@
-name: CI - Validation
+name: Validation - CI
 
 on:
   pull_request:
