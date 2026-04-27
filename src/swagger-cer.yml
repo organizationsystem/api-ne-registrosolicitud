@@ -1,0 +1,158 @@
+openapi: 3.0.0
+info:
+  title: API-NE-RegistroSolicitud
+  description: "Api de registro"
+  version: 1.0.0
+  x-metadata-api:
+    metadataNegocio:
+      tribuOwner: Tribu Rock Alternativo
+      negocio: Siniestros
+      producto: Vida
+      dominio: ValidacionSiniestros
+      subDominio: ValidacionSiniestrosVida
+      productoOwner: Paullette Arce
+      squadOwner: The Killers
+      arquitecto: Jose Leonardo Canales Barrenechea
+      tipoApi: Negocio
+      tipoCanal: Canales masivos (autoservicio)
+    metadataTecnica:
+      tipoExposicion: Interna
+      tipoWorkload: microservicio
+      lenguajeProgramacion: Java
+      nombreServicioBackend: ms-ne-validacionsiniestrosvida
+      consumidorApi: GEIX
+      codigoAplicacion: GEIX
+      mecanismoAutenticacion: ApiKey
+servers:
+- url: https://virtserver.swaggerhub.com/PacificoSegurosPeru/API-NE-ValidacionSiniestrosVida/1.1.1
+  description: SwaggerHub API Auto Mocking
+- url: https://virtserver.swaggerhub.com/PacificoSegurosPeru/API-NE-ValidacionSiniestrosVida/1.1.0
+  description: SwaggerHub API Auto Mocking
+- url: https://server.apim.desa/ne-persona-ejemplo/v1
+  description: Servidor de Desarrollo
+- url: https://server.apim.certi/ne-persona-ejemplo/v1
+  description: Servidor de Calidad
+- url: https://server.apim.prod/ne-persona-ejemplo/v1
+  description: Servidor de Producción
+security:
+- ApiKey: []
+- TokenJWT: []
+paths:
+  /solicitudes/registro:
+    post:
+      tags:
+      - solicitud
+      summary: Inicia un registro
+      description: Descripción detallada de la operación.
+      operationId: inici
+      parameters:
+      - name: Transaccion-Id
+        in: header
+        description: "Permite rastrear la petición en caso de ser necesario, es el ID de correlación de la petición. Para generarlo usar :UUID.randomUUID()"
+        required: true
+        schema:
+          type: string
+        example: 2ba68a48-c7d7-4997-a0e6-3fe11982473a
+      - name: Aplicacion-Id
+        in: header
+        description: "Se refiere al identificador único de la aplicación que está consumiento la API. La aplicación debe estar registrada en el  <a href=\"https://pacificocia.sharepoint.com/:x:/r/sites/CoE_Arquitectura_CSC/_layouts/15/doc2.aspx?sourcedoc=%7BAE85AD75-EDBB-4275-98D1-B62D682EC82F%7D&file=Inventario%20de%20Aplicaciones%20PAC%C3%8DFICO%20-%20PRIMAAFP.xlsx&action=default&mobileredirect=true&cid=d4922cf3-ef8b-4d7f-9020-cb9330e5b622\">Inventario de Aplicaciones</a>. En caso de no estarlo, se debe coordinar con el Arquitecto."
+        required: true
+        schema:
+          type: string
+        example: SEOF
+      - name: Nombre-Aplicacion
+        in: header
+        description: "Se refiere al nombre de la aplicación que está consumiento la API. La aplicación debe estar registrada en el  <a href=\"https://pacificocia.sharepoint.com/:x:/r/sites/CoE_Arquitectura_CSC/_layouts/15/doc2.aspx?sourcedoc=%7BAE85AD75-EDBB-4275-98D1-B62D682EC82F%7D&file=Inventario%20de%20Aplicaciones%20PAC%C3%8DFICO%20-%20PRIMAAFP.xlsx&action=default&mobileredirect=true&cid=d4922cf3-ef8b-4d7f-9020-cb9330e5b622\">Inventario de Aplicaciones</a>. En caso de no estarlo, se debe coordinar con el Arquitecto."
+        required: true
+        schema:
+          type: string
+        example: Servicios Open Finance
+      - name: Usuario-Consumidor-Id
+        in: header
+        description: Se refiere al usuario que realiza la acción. Si no se tiene el usuario debe tener el valor de ANONIMO.
+        required: true
+        schema:
+          type: string
+        example: Usuario-Consumidor
+      - name: Nombre-Servicio-Consumidor
+        in: header
+        description: Se refiere al nombre único de microservicio del consumidor.
+        required: true
+        schema:
+          type: string
+        example: Servicio-Consumidor
+      - name: Ocp-Apim-Subscription-Key
+        in: header
+        description: Clave de suscripción de APIM Azure.
+        required: true
+        schema:
+          type: string
+        example: 2e7f7c92ca45482d81f4adae2aee7d59
+      - name: Token-Seguridad
+        in: header
+        description: Para identificar al usuario después de un inicio de sesión exitoso y acceder a recursos protegidos. Para APIs de Canal.
+        required: false
+        schema:
+          type: string
+        example: 2ba68a48-c7d7-4997-a0e6-3fe11982473a
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudIniciarCaso"
+        required: true
+      responses:
+        "200":
+          description: Se envió el inició del caso correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaIniciarCaso"
+        "204":
+          description: No se encontró un siniestro asociado al nro de siniestro.
+        "400":
+          description: Solicitud Incorrecta
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+              examples:
+                Error_De_Validacion_NumeroDeCaracteres:
+                  $ref: "#/components/examples/Error_De_Validacion_NumeroDeCaracteres"
+                Error_De_Validacion_FormatoInvalido:
+                  $ref: "#/components/examples/Error_De_Validacion_FormatoInvalido"
+                Formato_Inválido:
+                  $ref: "#/components/examples/Formato_Invalido"
+                Campos_Obligatorios:
+                  $ref: "#/components/examples/Campos_Obligatorios"
+        "409":
+          description: Conflicto
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+              examples:
+                ID_Incorrecto:
+                  $ref: "#/components/examples/ID_Incorrecto"
+        "422":
+          description: Entidad No Procesable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+              examples:
+                ID_Incorrecto:
+                  $ref: "#/components/examples/ID_Incorrecto"
+                Formato_ID:
+                  $ref: "#/components/examples/Formato_ID"
+                ID_Inactivo:
+                  $ref: "#/components/examples/ID_Inactivo"
+        "500":
+          description: Error Interno Del Servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+              examples:
+                Internal_Server_Error:
+                  $ref: "#/components/examples/Internal_Server_Error"
